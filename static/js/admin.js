@@ -189,35 +189,47 @@ function initializeDashboard() {
     renderAlerts();
 }
 
+// Global flag to track if event listeners are attached
+let listenersAttached = false;
+
 function setupEventListeners() {
+    // Only attach once to avoid duplicate listeners
+    if (listenersAttached) return;
+    listenersAttached = true;
+    
     document.addEventListener('click', (e) => {
         const btn = e.target.closest('button, .remove-watchlist');
         if (!btn) return;
         // view details
         if (btn.classList.contains('view-details-btn')) {
             const id = btn.dataset.id;
+            console.log('Details clicked for ID:', id);
             openAsteroidProfile(id);
             return;
         }
         // add/remove watchlist
         if (btn.classList.contains('add-watchlist-btn')) {
             const id = btn.dataset.id;
+            console.log('Watchlist clicked for ID:', id);
             addToWatchlist(id);
             return;
         }
         if (btn.classList.contains('remove-watchlist')) {
             const id = btn.dataset.id;
+            console.log('Remove watchlist clicked for ID:', id);
             removeFromWatchlist(id);
             return;
         }
         // compare toggle
         if (btn.classList.contains('compare-btn')) {
             const id = btn.dataset.id;
+            console.log('Compare clicked for ID:', id);
             toggleCompareSelection(id);
             return;
         }
     });
 }
+
 
 // ========================
 // UI INJECTION
@@ -599,6 +611,9 @@ function renderAsteroidFeed(asteroids) {
             </div>
         </div>
     `).join('');
+    
+    // Re-attach event listeners after rendering new cards
+    if (listenersAttached) setupEventListeners(); // Will be no-op since flag is true
 }
 
 function updateSummaryStats(filtered = allAsteroids) {
