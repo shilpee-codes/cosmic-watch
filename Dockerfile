@@ -12,8 +12,4 @@ RUN pip install django
 
 EXPOSE 8000
 
-<<<<<<< HEAD
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
-=======
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
->>>>>>> e57c625199905baa02e771c7b6a951bc54580ea8
