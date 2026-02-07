@@ -69,7 +69,7 @@ def login_p(request):
         if role == "admin":
             if AdminUser.objects.filter(user=user).exists():
                 login(request, user)
-                return redirect("home")
+                return redirect("admin_home")
             else:
                 messages.error(request, "You are not registered as an admin")
                 return redirect("login")

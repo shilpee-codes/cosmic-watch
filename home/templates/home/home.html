@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  {% load static %}
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="CosmicWatch - Real-time Near-Earth Object monitoring with intelligent risk analysis">
   <title>CosmicWatch - NEO Dashboard</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
   <style>
     /* ==================== CSS VARIABLES ==================== */
 :root {
@@ -1626,6 +1627,136 @@ button:focus {
 .hidden {
   display: none !important;
 }
+
+/* ==================== COMMENTS SECTION ==================== */
+.comments-section {
+  margin-top: var(--spacing-xl);
+  padding: var(--spacing-xl);
+  background: var(--color-card-bg);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  position: relative;
+  z-index: 1;
+}
+
+.comments-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding-bottom: var(--spacing-md);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.comments-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.comments-count {
+  color: var(--color-text-muted);
+  font-size: 1rem;
+}
+
+.comment-form {
+  margin-bottom: var(--spacing-xl);
+}
+
+.form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+.form-group label {
+  display: block;
+  color: var(--color-text-muted);
+  font-weight: 500;
+  margin-bottom: var(--spacing-xs);
+}
+
+.form-textarea {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(125, 249, 255, 0.2);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-light);
+  font-size: 1rem;
+  font-family: inherit;
+  transition: all 0.3s ease;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: var(--glow-primary);
+}
+
+.submit-btn {
+  padding: var(--spacing-sm) var(--spacing-xl);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  color: var(--color-bg-dark);
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-md);
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glow-primary), var(--shadow-lg);
+}
+
+.comments-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.comment {
+  padding: var(--spacing-md);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--color-primary);
+  transition: all 0.3s ease;
+}
+
+.comment:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: translateX(5px);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.comment-author {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.comment-date {
+  color: var(--color-text-dim);
+  font-size: 0.85rem;
+}
+
+.comment-text {
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
   </style>
 </head>
 <body>
@@ -1747,8 +1878,39 @@ button:focus {
     <div id="empty-state" class="empty-state" style="display: none;">
       <div class="empty-icon">🌑</div>
       <p class="empty-title">No Asteroids Found</p>
-      <p class="empty-subtitle">Try adjusting your filters or refresh the data</p>
     </div>
+
+    <!-- Comments Section -->
+    <section class="comments-section" id="comments">
+      <div class="comments-header">
+        <h2 class="comments-title">💬 Community Discussion</h2>
+        <span class="comments-count" id="comment-count">0 comments</span>
+      </div>
+
+      <!-- Comment Form (only for authenticated users) -->
+      <form class="comment-form" id="comment-form" style="display: none;">
+        <div class="form-group">
+          <label for="comment-text">Your Comment</label>
+          <textarea 
+            id="comment-text" 
+            class="form-textarea" 
+            placeholder="Share your thoughts about asteroid tracking..."
+            required
+          ></textarea>
+        </div>
+        <button type="submit" class="submit-btn">Post Comment</button>
+      </form>
+
+      <!-- Login prompt for unauthenticated users -->
+      <div id="comment-login-prompt" style="display: none; padding: var(--spacing-lg); background: rgba(125, 249, 255, 0.1); border-radius: var(--radius-md); text-align: center;">
+        <p style="color: var(--color-text-muted); margin-bottom: var(--spacing-md);">Please <a href="{% url 'login' %}" style="color: var(--color-primary); text-decoration: none;">login</a> to post comments.</p>
+      </div>
+
+      <!-- Comments List -->
+      <div class="comments-list" id="comments-list">
+        <!-- Comments will be dynamically loaded here -->
+      </div>
+    </section>
   </main>
 
   <!-- Footer -->
@@ -1763,6 +1925,111 @@ button:focus {
     </div>
   </footer>
 
-  <script src="js/main.js"></script>
+  <script src="{% static 'js/main.js' %}"></script>
+
+  <script>
+    const COMMENTS_API = "{% url 'comments_api' %}";
+    const isAuthenticated = {{ request.user.is_authenticated|lower }};
+    const username = "{{ request.user.username }}";
+
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    function formatTimeAgo(isoDate) {
+      const now = new Date();
+      const date = new Date(isoDate);
+      const secondsAgo = Math.floor((now - date) / 1000);
+      if (secondsAgo < 60) return 'Just now';
+      if (secondsAgo < 3600) return `${Math.floor(secondsAgo / 60)}m ago`;
+      if (secondsAgo < 86400) return `${Math.floor(secondsAgo / 3600)}h ago`;
+      return `${Math.floor(secondsAgo / 86400)}d ago`;
+    }
+
+    async function loadComments() {
+      try {
+        const res = await fetch(COMMENTS_API, { credentials: 'same-origin' });
+        if (!res.ok) throw new Error('Failed to load');
+        const data = await res.json();
+        const list = document.getElementById('comments-list');
+        const count = document.getElementById('comment-count');
+
+        if (!data.comments || data.comments.length === 0) {
+          list.innerHTML = '<div style="text-align: center; padding: var(--spacing-lg); color: var(--color-text-muted);">No comments yet. Be the first to share your thoughts!</div>';
+          count.textContent = '0 comments';
+          return;
+        }
+
+        list.innerHTML = data.comments.map(c => `
+          <div class="comment">
+            <div class="comment-header">
+              <span class="comment-author">👤 ${c.author}</span>
+              <span class="comment-date">${formatTimeAgo(c.created_at)}</span>
+            </div>
+            <p class="comment-text">${c.text}</p>
+          </div>
+        `).join('');
+        
+        count.textContent = `${data.comments.length} comment${data.comments.length !== 1 ? 's' : ''}`;
+      } catch (e) {
+        console.error('Failed to load comments', e);
+      }
+    }
+
+    // Show/hide form based on auth status
+    window.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('comment-form');
+      const prompt = document.getElementById('comment-login-prompt');
+      if (isAuthenticated) {
+        form.style.display = 'block';
+        prompt.style.display = 'none';
+      } else {
+        form.style.display = 'none';
+        prompt.style.display = 'block';
+      }
+      loadComments();
+    });
+
+    // Handle comment submission
+    document.getElementById('comment-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const textarea = document.getElementById('comment-text');
+      const text = textarea.value.trim();
+      if (!text) return;
+
+      const csrftoken = getCookie('csrftoken');
+      try {
+        const res = await fetch(COMMENTS_API, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken
+          },
+          body: JSON.stringify({ text })
+        });
+        if (!res.ok) {
+          alert('Failed to post comment');
+          return;
+        }
+        textarea.value = '';
+        loadComments();
+      } catch (e) {
+        console.error('Failed to submit comment', e);
+        alert('Failed to post comment');
+      }
+    });
+  </script>
 </body>
 </html>
